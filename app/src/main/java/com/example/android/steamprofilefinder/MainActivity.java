@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
                 if (profileURL == null || profileURL.equals("")) {
                     return null;
                 }
-                Log.d(TAG, "AsyncTaskLoader loading forecast from url: " + profileURL);
+                Log.d(TAG, "AsyncTaskLoader loading steam profile from url: " + profileURL);
 
                 String profileJSON = null;
                 try {
