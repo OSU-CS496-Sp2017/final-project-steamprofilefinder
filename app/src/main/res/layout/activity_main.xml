@@ -6,14 +6,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8sp"
-    tools:context="com.example.android.steamprofilefinder.MainActivity">
+    tools:context="com.example.android.steamprofilefinder.MainActivity"
+    android:background="@drawable/gradient_background">
 
     <EditText
         android:id="@+id/et_search_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="24sp"
-        android:hint="Lookup Steam Username" />
+        android:hint="Lookup Steam Username"
+        android:textColorHint="#ffffff"
+        android:shadowColor="#4b4b4b"
+        android:textColor="#ffffff"/>
 
     <Button
         android:id="@+id/btn_search"
@@ -29,7 +33,9 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_profile_items"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:shadowColor="#4b4b4b"
+            android:textColor="#ffffff"/>
 
         <TextView
             android:id="@+id/tv_loading_error_message"
@@ -38,7 +44,9 @@
             android:textSize="20sp"
             android:padding="16dp"
             android:visibility="invisible"
-            android:text="@string/loading_error_message" />
+            android:text="@string/loading_error_message"
+            android:shadowColor="#4b4b4b"
+            android:textColor="#ffffff"/>
 
         <ProgressBar
             android:id="@+id/pb_loading_indicator"

@@ -36,9 +36,6 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
     private static final String PROFILE_URL_KEY = "profileUrl";
     private static final int PROFILE_LOADER_ID = 0;
 
-    private TextView mProfileItemTV;
-
-    private TextView mSteamProfileTV;
     private EditText mSearchBoxET;
     private RecyclerView mProfileItemsRV;
     private ProgressBar mLoadingIndicatorPB;
@@ -46,10 +43,16 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
     private ProfileAdapter mProfileAdapter;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
+    private String name;
+
+    ArrayList<SteamUtils.ProfileItem> profileItems;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        profileItems = null;
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -75,7 +78,12 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
         mProfileItemsRV.setLayoutManager(new LinearLayoutManager(this));
         mProfileItemsRV.setHasFixedSize(true);
 
-        callLoader("initLoader", mProfileItemsRV);
+        if(savedInstanceState != null) {
+            Log.d(TAG, "Delivering cached results");
+            mProfileAdapter.updateProfileItems(profileItems);
+        } else {
+            callLoader("initLoader", mProfileItemsRV);
+        }
     }
 
     public void callLoader(final String loadType, RecyclerView mProfileItemsRV){
@@ -90,8 +98,9 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
             @Override
             public void onClick(View v) {
                 String searchQuery = mSearchBoxET.getText().toString();
+                name = searchQuery;
                 if (!TextUtils.isEmpty(searchQuery)) {
-                    doSteamSearch(searchQuery, loadType);
+                    doSteamSearch(searchQuery, "restartLoader");
                 }
             }
         });
@@ -112,10 +121,24 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (profileItems != null) {
+            outState.putSerializable(PROFILE_URL_KEY, profileItems);
+        }
+    }
+    //Changed
+
+    @Override
     public void onProfileItemClick(SteamUtils.ProfileItem profileItem) {
-        Intent intent = new Intent(this, ProfileItemDetailActivity.class);
-        intent.putExtra(SteamUtils.ProfileItem.EXTRA_PROFILE_ITEM, profileItem);
-        startActivity(intent);
+        if (profileItem.description != "Did not find player!") {
+            Intent intent = new Intent(this, ProfileItemDetailActivity.class);
+            intent.putExtra(SteamUtils.ProfileItem.EXTRA_PROFILE_ITEM, profileItem);
+            startActivity(intent);
+        } else {
+            // do nothing
+        }
+
     }
 
     @Override
@@ -130,6 +153,9 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
+                return true;
+            case android.R.id.home:
+                onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -185,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements ProfileAdapter.On
         if (profileJSON != null) {
             mLoadingErrorMessageTV.setVisibility(View.INVISIBLE);
             mProfileItemsRV.setVisibility(View.VISIBLE);
-            ArrayList<SteamUtils.ProfileItem> profileItems = SteamUtils.parseProfileJSON(profileJSON);
+            profileItems = SteamUtils.parseProfileJSON(profileJSON, name);
             mProfileAdapter.updateProfileItems(profileItems);
         } else {
             mProfileItemsRV.setVisibility(View.INVISIBLE);
